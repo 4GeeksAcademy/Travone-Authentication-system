@@ -1,19 +1,47 @@
-import { Link } from "react-router-dom";
+import React from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 
-export const Navbar = () => {
+export function Navbar() {
+  const navigate = useNavigate();
+  const token = localStorage.getItem('token');
 
-	return (
-		<nav className="navbar navbar-light bg-light">
-			<div className="container">
-				<Link to="/">
-					<span className="navbar-brand mb-0 h1">React Boilerplate</span>
-				</Link>
-				<div className="ml-auto">
-					<Link to="/demo">
-						<button className="btn btn-primary">Check the Context in action</button>
-					</Link>
-				</div>
-			</div>
-		</nav>
-	);
-};
+  const handleLogout = async () => {
+    try {
+      const res = await fetch('/api/logout', {
+        method: 'POST',
+        headers: {
+          'Authorization': token
+        }
+      });
+      if (res.ok) {
+        localStorage.removeItem('token');
+        navigate('/login');
+      }
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
+
+  return (
+    <nav className="navbar">
+      <div className="nav-brand">
+        <Link to="/">Auth Demo</Link>
+      </div>
+      <div className="nav-links">
+        {token ? (
+          <>
+            <Link to="/private">Dashboard</Link>
+            <button onClick={handleLogout} className="logout-btn">Logout</button>
+          </>
+        ) : (
+          <>
+            <Link to="/login">Login</Link>
+            <Link to="/signup">Sign Up</Link>
+          </>
+        )}
+      </div>
+    </nav>
+  );
+}
+
+// Remove default export as we're using named export
